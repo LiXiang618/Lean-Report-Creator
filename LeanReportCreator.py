@@ -37,11 +37,11 @@ class LeanReportCreator(object):
         self.is_drawable = False
         if "Strategy Equity" in data["Charts"] and "Benchmark" in data["Charts"]:
             strategySeries = data["Charts"]["Strategy Equity"]["Series"]["Equity"]["Values"] 
-            self.initStrategyValue = strategySeries[0]['y']
             benchmarkSeries = data["Charts"]["Benchmark"]["Series"]["Benchmark"]["Values"] 
-            self.initBenchmarkValue = benchmarkSeries[0]['y']
             df_strategy = pd.DataFrame(strategySeries).set_index('x')
             df_benchmark = pd.DataFrame(benchmarkSeries).set_index('x')
+            df_strategy = df_strategy[df_strategy > 0]
+            df_benchmark = df_benchmark[df_benchmark > 0]
             df_strategy = df_strategy[~df_strategy.index.duplicated(keep='first')]
             df_benchmark = df_benchmark[~df_benchmark.index.duplicated(keep='first')]
             df = pd.concat([df_strategy,df_benchmark],axis = 1)
@@ -49,6 +49,8 @@ class LeanReportCreator(object):
             df = df.set_index(pd.to_datetime(df.index, unit='s'))
             self.df = df.fillna(method = 'ffill')
             self.df = df.fillna(method = 'bfill')
+            self.initStrategyValue = df["Strategy"][0]
+            self.initBenchmarkValue = df["Benchmark"][0]
             self.is_drawable = True
     
     def cumulative_return(self, name = "cumulative-return.png", width = 11.5, height = 2.5):
@@ -89,7 +91,7 @@ class LeanReportCreator(object):
             df_this["Above Zero"] = [max(0,x) for x in df_this["Above Zero"]]
             
             plt.figure()
-            ax = df_this.plot.bar(color = ["#F5AE29","grey"])
+            ax = df_this.plot.bar(color = ["#F5AE29","grey"], width = 1)
             fig = ax.get_figure()
             plt.xticks(rotation = 0,ha = 'center')
             plt.xlabel("")

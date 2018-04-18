@@ -81,9 +81,9 @@ class LeanReportCreator(object):
             df_this.drop("Benchmark",1,inplace = True)
             df_this = df_this.groupby([df_this.index.date]).apply(lambda x: x.tail(1))
             df_this.index = df_this.index.droplevel(1)
-            logret_strategy = np.array([self.initStrategyValue] + df_this["Strategy"].tolist())
-            logret_strategy = np.diff(np.log(logret_strategy))
-            df_this["Strategy"] = logret_strategy*100
+            ret_strategy = np.array([self.initStrategyValue] + df_this["Strategy"].tolist())
+            ret_strategy = ret_strategy[1:]/ret_strategy[:-1] - 1
+            df_this["Strategy"] = ret_strategy*100
             df_this.rename(columns = {"Strategy":"Above Zero"},inplace = True)
             df_this["Below Zero"] = [min(0,x) for x in df_this["Above Zero"]]
             df_this["Above Zero"] = [max(0,x) for x in df_this["Above Zero"]]
@@ -339,12 +339,12 @@ class LeanReportCreator(object):
                 df_this = self.df.copy()
                 df_this = df_this.groupby([df_this.index.date]).apply(lambda x: x.tail(1))
                 df_this.index = df_this.index.droplevel(1)    
-                logret_strategy = np.array([self.initStrategyValue] + df_this["Strategy"].tolist())
-                logret_strategy = np.diff(np.log(logret_strategy))
-                df_this["Strategy"] = logret_strategy*100
-                logret_benchmark = np.array([self.initBenchmarkValue] + df_this["Benchmark"].tolist())
-                logret_benchmark = np.diff(np.log(logret_benchmark))
-                df_this["Benchmark"] = logret_benchmark*100    
+                ret_strategy = np.array([self.initStrategyValue] + df_this["Strategy"].tolist())
+                ret_strategy = ret_strategy[1:]/ret_strategy[:-1] - 1
+                df_this["Strategy"] = ret_strategy*100
+                ret_benchmark = np.array([self.initBenchmarkValue] + df_this["Benchmark"].tolist())
+                ret_benchmark = ret_benchmark[1:]/ret_benchmark[:-1] - 1
+                df_this["Benchmark"] = ret_benchmark*100                    
                 df_this["Beta6mo"] = float("nan")
                 df_this["Beta12mo"] = float("nan")    
                 for i in range(days_L, len(df_this)):
@@ -382,9 +382,9 @@ class LeanReportCreator(object):
                 df_this.drop("Benchmark",1,inplace = True)
                 df_this = df_this.groupby([df_this.index.date]).apply(lambda x: x.tail(1))
                 df_this.index = df_this.index.droplevel(1) 
-                logret_strategy = np.array([self.initStrategyValue] + df_this["Strategy"].tolist())
-                logret_strategy = np.diff(np.log(logret_strategy))
-                df_this["Strategy"] = logret_strategy*100
+                ret_strategy = np.array([self.initStrategyValue] + df_this["Strategy"].tolist())
+                ret_strategy = ret_strategy[1:]/ret_strategy[:-1] - 1
+                df_this["Strategy"] = ret_strategy*100
                 df_this["SharpeRatio"] = float("nan")
                 for i in range(days_S, len(df_this)):
                     tmp_ret = np.mean(df_this["Strategy"][(i-days_S):i]) * days_in_one_year

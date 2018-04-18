@@ -257,17 +257,21 @@ class LeanReportCreator(object):
             df_this["Return"] = (df_this.iloc[:,1] / df_this.iloc[:,0] - 1) * 100
             df_this["Group"] = np.floor(df_this["Return"])
             tmp_mean = np.mean(df_this["Return"])
+            tmp_mean = 11 if tmp_mean > 10 else -11 if tmp_mean < -10 else tmp_mean
             df_this = df_this.iloc[:,[2,3]]
+            df_this["Group"] = [x if x<=10 and x>=-10 else float("-Inf") if x<-10 else float("Inf") for x in df_this["Group"]]
             df_this = df_this.groupby([df_this["Group"]]).count()
-            tmp_min, tmp_max = min(int(min(df_this.index.values)),0), max(int(max(df_this.index.values)),0)
-            for i in range(tmp_min, tmp_max+1):
+            tmp_min = int(min(max(min(df_this.index.values),-11),0))
+            tmp_max = int(max(min(max(df_this.index.values), 11),0))
+            for i in range(max(tmp_min,-10), min(tmp_max,10)+1):
                 if i not in df_this.index.values:
                     tmp = df_this.iloc[0].copy()
                     tmp[0] = 0
                     tmp.name = np.float64(i)
                     df_this = df_this.append(tmp,ignore_index = False)
             df_this.sort_index(inplace = True)
-            
+            df_this.index = [">10" if x == float("Inf") else "<-10" if x == float("-Inf") else int(x) for x in df_this.index]
+
             plt.figure()
             ax = df_this.plot.bar(color = ["#F5AE29"])
             fig = ax.get_figure()

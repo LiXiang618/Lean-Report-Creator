@@ -184,23 +184,8 @@ class LeanReportCreator(object):
             df_this = df_this.unstack()
             df_this = df_this.iloc[::-1]
             
-            cdict = {'red':  ((0, 1.0, 1.0),
-                               (0.35, 0.9, 1.0),
-                               (0.5, 0.85, 1.0),
-                               (0.65, 0.5, 1.0),
-                               (1, 0.0, 0.0)),
-                     'blue':  ((0.0, 0.0, 0.0),
-                               (1.0, 0.0, 0.0)),         
-                    'green': ((0.0, 0.0, 0.0),
-                               (0.35, 0.5, 1.0),
-                               (0.5, 0.85, 1.0),
-                               (0.65, 0.9, 1.0),
-                               (1.0, 1.0, 1.0)),         
-                    }
-            custom_cmap = LinearSegmentedColormap('custom_cmap', cdict)
-            plt.register_cmap(cmap=custom_cmap) 
             plt.figure()
-            ax = plt.imshow(df_this, aspect='auto',cmap=custom_cmap, interpolation='none',vmin = -10, vmax = 10)
+            ax = plt.imshow(df_this, aspect='auto',cmap="RdYlGn", interpolation='none',vmin = -15, vmax = 15)
             fig = ax.get_figure()
             fig.set_size_inches(3.5*2,2.5*2)
             plt.xlabel('Month',size = 12,fontweight='bold')

@@ -17,7 +17,7 @@ lu = matplotlib.font_manager.FontProperties(family = "Open Sans Condensed")
 from matplotlib.dates import DateFormatter
 import pandas as pd
 import numpy as np
-from matplotlib.colors import LinearSegmentedColormap
+import matplotlib.colors as mcolors
 from datetime import date
 import re
 import math
@@ -184,8 +184,25 @@ class LeanReportCreator(object):
             df_this = df_this.unstack()
             df_this = df_this.iloc[::-1]
             
+            def make_colormap(seq):
+                seq = [(None,) * 3, 0.0] + list(seq) + [1.0, (None,) * 3]
+                cdict = {'red': [], 'green': [], 'blue': []}
+                for i, item in enumerate(seq):
+                    if isinstance(item, float):
+                        r1, g1, b1 = seq[i - 1]
+                        r2, g2, b2 = seq[i + 1]
+                        cdict['red'].append([item, r1, r2])
+                        cdict['green'].append([item, g1, g2])
+                        cdict['blue'].append([item, b1, b2])
+                return mcolors.LinearSegmentedColormap('CustomMap', cdict)
+            c = mcolors.ColorConverter().to_rgb
+            c_map = make_colormap([c('#CC0000'),0.1,c('#FF0000'),0.2,c('#FF3333'),
+                                     0.3,c('#FF9933'),0.4,c('#FFFF66'),0.5,c('#FFFF99'),
+                                           0.6,c('#B2FF66'),0.7,c('#99FF33'),0.8,
+                                                 c('#00FF00'),0.9, c('#00CC00')])   
+            
             plt.figure()
-            ax = plt.imshow(df_this, aspect='auto',cmap="RdYlGn", interpolation='none',vmin = -15, vmax = 15)
+            ax = plt.imshow(df_this, aspect='auto',cmap=c_map, interpolation='none',vmin = -10, vmax = 10)
             fig = ax.get_figure()
             fig.set_size_inches(3.5*2,2.5*2)
             plt.xlabel('Month',size = 12,fontweight='bold')

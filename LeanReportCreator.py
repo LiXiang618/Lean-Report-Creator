@@ -20,6 +20,7 @@ import numpy as np
 import matplotlib.colors as mcolors
 from datetime import date
 from datetime import datetime
+from datetime import timedelta
 import re
 import math
 
@@ -55,7 +56,7 @@ class LeanReportCreator(object):
             self.initBenchmarkValue = df["Benchmark"][0]
             self.is_drawable = True
     
-    def cumulative_return(self, name = "cumulative-return.svg", width = 11.5, height = 2.5):
+    def cumulative_return(self, name = "cumulative-return.png", width = 11.5, height = 2.5):
         if self.is_drawable:
             df_this = self.df.copy()
             df_this["Strategy"] = (df_this["Strategy"]/self.initStrategyValue-1)*100
@@ -73,13 +74,13 @@ class LeanReportCreator(object):
             ax.grid()
             fig.set_size_inches(width, height)
             #plt.show()
-            fig.savefig(self.outdir + "/" + name)
+            fig.savefig(self.outdir + "/" + name, dpi = 200)
             plt.cla()
             plt.clf()
             plt.close('all')
         return True
         
-    def daily_returns(self, name = "daily-returns.svg", width = 11.5, height = 2.5):
+    def daily_returns(self, name = "daily-returns.png", width = 11.5, height = 2.5):
         if self.is_drawable:
             df_this = self.df.copy()
             df_this.drop("Benchmark",1,inplace = True)
@@ -88,36 +89,36 @@ class LeanReportCreator(object):
             ret_strategy = np.array([self.initStrategyValue] + df_this["Strategy"].tolist())
             ret_strategy = ret_strategy[1:]/ret_strategy[:-1] - 1
             df_this["Strategy"] = ret_strategy*100
-            df_this.rename(columns = {"Strategy":"Above Zero"},inplace = True)
-            df_this["Below Zero"] = [min(0,x) for x in df_this["Above Zero"]]
-            df_this["Above Zero"] = [max(0,x) for x in df_this["Above Zero"]]
+            df_this.index = pd.to_datetime(df_this.index)
+            for i in range(len(df_this)-1):
+                tmp_delta = df_this.index[i+1] - df_this.index[i]
+                for j in range(1, tmp_delta.days):
+                    df_this.loc[df_this.index[i] + timedelta(j)] = 0
+                df_this.loc[df_this.index[i] + timedelta(0.99)] = df_this.loc[df_this.index[i]]
+            df_this.loc[df_this.index[i+1] + timedelta(0.99)] = df_this.loc[df_this.index[i+1]]  
+            df_this.sort_index(inplace = True)
             
             plt.figure()
-            ax = df_this.plot.bar(color = ["#F5AE29","grey"],width = 1)
+            ax = df_this.plot(color = "white",  alpha=0)
+            ax.fill_between(df_this.index.values,0,df_this['Strategy'], where = 0<df_this['Strategy'], color = "#F5AE29",step = "pre")
+            ax.fill_between(df_this.index.values,0,df_this['Strategy'], where = 0>df_this['Strategy'], color = "grey",step = "pre")
             fig = ax.get_figure()
             plt.xticks(rotation = 0,ha = 'center')
             plt.xlabel("")
             plt.ylabel('Daily Return(%)',size = 12,fontweight='bold')
-            ax.legend(["Above Zero","Below Zero"],prop = {'weight':'bold'},frameon=False, loc = "upper left")
-            if len(df_this) > 10:
-                nticks = min(len(df_this),5)
-                step = int(len(df_this)/nticks)
-                tickId = [x for x in range(0, step*nticks,step)]
-                plt.xticks(tickId,[df_this.index.values[x].strftime('%b %Y') for x in tickId])
-            else:
-                tickerlabels = [x.strftime('%b %Y') for x in df_this.index]
-                ax.xaxis.set_major_formatter(ticker.FixedFormatter(tickerlabels))
+            ax.xaxis.set_major_formatter(DateFormatter("%b %Y"))
             plt.axhline(y = 0, color = 'black')
+            ax.legend_.remove()
             ax.grid()
             fig.set_size_inches(width, height)
             #plt.show()
-            fig.savefig(self.outdir + "/" + name)
+            fig.savefig(self.outdir + "/" + name, dpi = 200)
             plt.cla()
             plt.clf()
             plt.close('all')                
         return True
         
-    def drawdown(self,name = "drawdowns.svg",width = 11.5, height = 2.5):
+    def drawdown(self,name = "drawdowns.png",width = 11.5, height = 2.5):
         if self.is_drawable:
             df_this = self.df.copy()
             df_this.drop("Benchmark",1,inplace = True)
@@ -168,13 +169,13 @@ class LeanReportCreator(object):
             ax.grid()
             fig.set_size_inches(width, height)
             #plt.show()
-            fig.savefig(self.outdir + "/" + name)
+            fig.savefig(self.outdir + "/" + name, dpi = 200)
             plt.cla()
             plt.clf()
             plt.close('all')
         return True
    
-    def monthly_returns(self, name = "monthly-returns.svg",width = 3.5*2, height = 2.5*2):
+    def monthly_returns(self, name = "monthly-returns.png",width = 3.5*2, height = 2.5*2):
         if self.is_drawable:
             df_this = self.df.copy()
             df_this.drop("Benchmark",1,inplace = True)
@@ -219,13 +220,13 @@ class LeanReportCreator(object):
             for (j,i),label in np.ndenumerate(df_this):   
                 plt.text(i,j,round(label,1),ha='center',va='center')
             fig.set_size_inches(width, height)
-            fig.savefig(self.outdir + "/" + name)
+            fig.savefig(self.outdir + "/" + name, dpi = 200)
             plt.cla()
             plt.clf()
             plt.close('all')
         return True
     
-    def annual_returns(self, name = "annual-returns.svg",width = 3.5*2, height = 2.5*2):
+    def annual_returns(self, name = "annual-returns.png",width = 3.5*2, height = 2.5*2):
         if self.is_drawable:
             df_this = self.df.copy()
             df_this.drop("Benchmark",1,inplace = True)
@@ -248,13 +249,13 @@ class LeanReportCreator(object):
             plt.legend([vline],["mean"],loc='upper left')
             ax.grid()
             fig.set_size_inches(width, height)
-            fig.savefig(self.outdir + "/" + name)
+            fig.savefig(self.outdir + "/" + name, dpi = 200)
             plt.cla()
             plt.clf()
             plt.close('all')
         return True
     
-    def monthly_return_distribution(self, name = "distribution-of-monthly-returns.svg",width = 3.5*2, height = 2.5*2):
+    def monthly_return_distribution(self, name = "distribution-of-monthly-returns.png",width = 3.5*2, height = 2.5*2):
         if self.is_drawable:
             df_this = self.df.copy()
             df_this.drop("Benchmark",1,inplace = True)
@@ -292,7 +293,7 @@ class LeanReportCreator(object):
             plt.legend([vline],["mean"],loc='upper left')
             ax.grid()
             fig.set_size_inches(width, height)
-            fig.savefig(self.outdir + "/" + name)
+            fig.savefig(self.outdir + "/" + name, dpi = 200)
             plt.cla()
             plt.clf()
             plt.close('all')
@@ -334,13 +335,13 @@ class LeanReportCreator(object):
                 plt.axhline(y = 0, color = 'black')
                 ax.grid()
                 fig.set_size_inches(width, height) 
-                fig.savefig(self.outdir + "/crisis-" +re.sub(r' ','-',titles[i].lower())+".svg")
+                fig.savefig(self.outdir + "/crisis-" +re.sub(r' ','-',titles[i].lower())+".png", dpi = 200)
                 plt.cla()
                 plt.clf()
                 plt.close('all')
         return True
     
-    def rolling_beta(self, name = "rolling-portfolio-beta-to-equity.svg",width = 11.5, height = 2.5):
+    def rolling_beta(self, name = "rolling-portfolio-beta-to-equity.png",width = 11.5, height = 2.5):
         if self.is_drawable:
             days_L = 252
             days_S = 126
@@ -376,13 +377,13 @@ class LeanReportCreator(object):
                 plt.axhline(y = 0, color = 'black')
                 ax.grid()
                 fig.set_size_inches(width, height)
-                fig.savefig(self.outdir + "/" + name)
+                fig.savefig(self.outdir + "/" + name, dpi = 200)
                 plt.cla()
                 plt.clf()
                 plt.close('all')
         return True
     
-    def rolling_sharpe(self, name = "rolling-sharpe-ratio(6-month).svg",width = 11.5, height = 2.5):
+    def rolling_sharpe(self, name = "rolling-sharpe-ratio(6-month).png",width = 11.5, height = 2.5):
         if self.is_drawable:
             days_S = 126
             days_in_one_year = 252
@@ -414,13 +415,13 @@ class LeanReportCreator(object):
                 plt.axhline(y = 0, color = 'black')
                 ax.grid()
                 fig.set_size_inches(width, height)
-                fig.savefig(self.outdir + "/" + name)
+                fig.savefig(self.outdir + "/" + name, dpi = 200)
                 plt.cla()
                 plt.clf()
                 plt.close('all')
         return True
     
-    def net_holdings(self, name = "net-holdings.svg",width = 11.5, height = 2.5):
+    def net_holdings(self, name = "net-holdings.png",width = 11.5, height = 2.5):
         if self.is_drawable:
             df_this = self.df.copy()
             df_this.drop("Benchmark",1,inplace = True)
@@ -439,41 +440,69 @@ class LeanReportCreator(object):
             df_this.index = df_this.index.droplevel(0)
             
             plt.figure()
-            ax = df_this.plot.bar(color=[np.where(df_this["Strategy"]>0, '#F5AE29', 'grey')],width = 1)
+            ax = df_this.plot(color = "white",  alpha=0)
+            ax.fill_between(df_this.index.values,0,df_this['Strategy'], where = 0<df_this['Strategy'], color = "#F5AE29",step = "pre")
+            ax.fill_between(df_this.index.values,0,df_this['Strategy'], where = 0>df_this['Strategy'], color = "grey",step = "pre")
             fig = ax.get_figure()
             plt.xticks(rotation = 0,ha = 'center')
             plt.xlabel("")
             plt.ylabel('Net Holdings(%)',size = 12,fontweight='bold')
-            if len(df_this) > 10:
-                nticks = min(len(df_this),5)
-                step = int(len(df_this)/nticks)
-                tickId = [x for x in range(0, step*nticks,step)]
-                plt.xticks(tickId,[pd.to_datetime(str(df_this.index.values[x])).strftime('%b %Y') for x in tickId])
-            else:
-                tickerlabels = [pd.to_datetime(str(x.strftime('%b %Y'))) for x in df_this.index]
-                ax.xaxis.set_major_formatter(ticker.FixedFormatter(tickerlabels))
+            ax.xaxis.set_major_formatter(DateFormatter("%b %Y"))
             plt.axhline(y = 0, color = 'black')
             ax.legend_.remove()
             ax.grid()
             fig.set_size_inches(width, height)
-            fig.savefig(self.outdir + "/" + name)
+            fig.savefig(self.outdir + "/" + name, dpi = 200)
             plt.cla()
             plt.clf()
             plt.close('all')
         return True
     
-    def leverage(self, name = "leverage.svg",width = 11.5, height = 2.5):
+    def leverage(self, name = "leverage.png",width = 11.5, height = 2.5):
         if self.is_drawable:
-            pass
-        return False
+            df_this = self.df.copy()
+            df_this.drop("Benchmark",1,inplace = True)
+            df_values = pd.DataFrame()
+            df_values["Value"] = [x["Value"] for x in self.orders.values()]
+            df_values = df_values.set_index([[datetime.strptime(x["Time"][0:19], '%Y-%m-%dT%H:%M:%S') for x in self.orders.values()]])
+            df_this = df_this.join(df_values)
+            df_this["Cash"] = -df_this["Value"]
+            df_this["Cash"][0] = df_this["Strategy"][0]
+            df_this.fillna(0,inplace = True)
+            df_this["Cash"] = np.cumsum(df_this["Cash"])
+            df_this["Value"] = df_this["Strategy"] - df_this["Cash"]
+            df_this["Strategy"] = abs(df_this["Value"]/df_this["Strategy"]*100)
+            df_this.drop(df_this.columns[[1,2]],1,inplace = True)
+            df_this = df_this.groupby([df_this.index.date,df_this.index.hour,df_this.index.minute], as_index = False).apply(lambda x: x.tail(1))
+            df_this.index = df_this.index.droplevel(0)
+            
+            plt.figure()
+            ax = df_this.plot(color = "#F5AE29")
+            ax.fill_between(df_this.index.values,0,df_this['Strategy'], color = "#F5AE29",step = "pre")
+            fig = ax.get_figure()
+            plt.xticks(rotation = 0,ha = 'center')
+            plt.xlabel("")
+            plt.ylabel('Leverage(%)',size = 12,fontweight='bold')
+            ax.xaxis.set_major_formatter(DateFormatter("%b %Y"))
+            plt.axhline(y = 0, color = 'black')
+            ax.legend_.remove()
+            ax.grid()
+            fig.set_size_inches(width, height)
+            fig.savefig(self.outdir + "/" + name, dpi = 200)
+            plt.cla()
+            plt.clf()
+            plt.close('all')
+        return True
     
     def asset_allocation(self,width = 11.5, height = 2.5):
         if self.is_drawable:
             pass
         return False
     
-    def return_prediction(self, name = "return-prediction.svg",width = 11.5, height = 2.5):
+    def return_prediction(self, name = "return-prediction.png",width = 11.5, height = 2.5):
         if self.is_drawable:
             pass
         return False
 
+lrc = LeanReportCreator("./json/a3f7f13e5aa473de69d6aa1ba0f35987.json")
+lrc.annual_returns()

@@ -173,12 +173,10 @@ def MethodGetAssetAllocationPageHTML(outdir):
 
 rightHeaderText = "Basic Template Algorithm"
 footerId = "fd11cebcb6528d4a1ea1adabf02a8c91"
-strategyDescription = "This is strategy Description"
-authorProfile = "*.jpg"
+strategyDescription = "Put your strategy description here:"
+authorProfile = "D:\Archave\QuantConnect 2018\WorkingSpace\LeanReportCreatorInPython\AuthorProfile.jpg"
 authorName = "Xiang Li"
-authorBio = "AuthorBiio"
-
-
+authorBio = "Put your biography here."
 
 def GenerateHTMLReport(outdir):
     
@@ -373,7 +371,7 @@ def GenerateHTMLReport(outdir):
                         <tbody>
                         <tr>
                             <td>
-                                <img src="https://cdn.quantconnect.com/web/i/users/profile/''' + authorProfile + '''">
+                                <img src="''' + authorProfile + '''">
                                 <p id="author-bio" class="text-justify editable" contentEditable="true" style="max-width: 286px;">''' + authorBio + '''</p>
                                 <i class="fa fa-pencil" style="margin: 15px 10px"></i>
                             </td>

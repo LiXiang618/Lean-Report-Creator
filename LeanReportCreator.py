@@ -693,5 +693,5 @@ class LeanReportCreator(object):
         GenerateHTML.GenerateHTMLReport(self.outdir)
 
 #Usage
-#lrc = LeanReportCreator("./json/b9cc168b278b5a86c53d392434db14a3.json")
-#lrc.genearte_report()
+lrc = LeanReportCreator("./json/b9cc168b278b5a86c53d392434db14a3.json")
+lrc.genearte_report()

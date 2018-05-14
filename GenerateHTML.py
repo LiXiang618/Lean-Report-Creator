@@ -172,9 +172,9 @@ def MethodGetAssetAllocationPageHTML(outdir):
     return ret
 
 rightHeaderText = "Basic Template Algorithm"
-footerId = "fd11cebcb6528d4a1ea1adabf02a8c91"
+footerId = ""
 strategyDescription = "Put your strategy description here:"
-authorProfile = "D:\Archave\QuantConnect 2018\WorkingSpace\LeanReportCreatorInPython\AuthorProfile.jpg"
+authorProfile = "D:\fakepath\LeanReportCreatorInPython\AuthorProfile.jpg"
 authorName = "Xiang Li"
 authorBio = "Put your biography here."
 
@@ -218,6 +218,7 @@ def GenerateHTMLReport(outdir):
         <link rel="stylesheet" href="''' + locationPrefix + '''/css/reports/bootstrap.css">
         <link rel="stylesheet" href="''' + locationPrefix + '''/css/reports/font-awesome.css">
         <link rel="stylesheet" href="''' + locationPrefix + '''/css/reports/pdf.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
         <script src="''' + locationPrefix + '''/js/libraries/jquery.js"></script>
         <script src="''' + locationPrefix + '''/js/libraries/bootstrap.min.js"></script>
         <script src="''' + locationPrefix + '''/js/libraries/jquery.growl.js"></script>
@@ -324,7 +325,7 @@ def GenerateHTMLReport(outdir):
     <body>
     
     <div style="position: fixed;bottom: 50px;right: 50px;">
-        <a href="/terminal/processReports/get/pdf/''' + footerId + '''" target="_blank" class="btn btn-lg btn-default hide-print">
+        <a href="https://www.quantconnect.com/terminal/processReports/get/pdf/''' + footerId + '''" target="_blank" class="btn btn-lg btn-default hide-print">
             <i class="fa fa-download"></i>
         </a>
     </div>
